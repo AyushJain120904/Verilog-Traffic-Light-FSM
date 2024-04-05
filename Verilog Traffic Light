@@ -1,0 +1,107 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 12/10/2023 12:16:07 AM
+// Design Name: 
+// Module Name: traffic_light
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+module traffic_light (
+  input clk, rst_n,
+  output reg [1:0] north, east
+);
+
+  parameter NG = 4'h0;
+  parameter NY = 4'h1;
+  parameter EG = 4'h2;
+  parameter EY = 4'h3;
+  
+  reg [3:0] state, next_state, counter;
+
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin 
+      state <= NG;
+    end
+    else state <= next_state;
+  end
+
+  always @(posedge clk or negedge rst_n) begin
+    if (!rst_n || counter >= 8) begin
+      counter <= 4'b0000;
+    end
+    else counter <= counter + 1;
+  end
+  
+  always @(state or counter) begin
+    case(state)
+      NG: begin
+        if (counter == 7)  begin 
+          next_state = NY;
+          end
+        else
+          next_state = NG;
+      end
+      NY: begin
+        if (counter >= 4)  
+          next_state = EG;
+        else
+          next_state = NY;
+      end
+      EG: begin
+        if (counter == 7)  begin
+          next_state = EY;
+          end
+        else
+          next_state = EG;
+      end
+      EY: begin
+        if (counter >= 4)  
+          next_state = NG; 
+        else
+          next_state = EY;
+      end
+      default: next_state = NG;
+    endcase
+  end
+  
+  always @(counter or posedge clk) begin
+    case (state)
+      NG: begin 
+        north = 2'b11;   // 11 - green ;  01 - yellow ; 00 - red
+        east = 2'b00;
+      end
+      NY: begin
+        north = 2'b01;
+        east = 2'b00;
+      end
+      EG: begin
+        north = 2'b00;
+        east = 2'b11;
+      end
+      EY: begin
+        north = 2'b00;
+        east = 2'b01;
+      end
+      default: begin
+        north = 2'b11;
+        east = 2'b00;
+      end
+    endcase
+  end
+endmodule
+
+
+
